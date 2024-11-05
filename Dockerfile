@@ -6,7 +6,7 @@ ARG OSDB_BKC_VERSION=
 ARG HASVER=${ROCMVERSION:+$ROCMVERSION}
 ARG HASVER=${HASVER:-$OSDB_BKC_VERSION}
 
-ARG BASEIMAGE=rocm/miopen:ci_5fec03
+ARG BASEIMAGE=rocm/miopen:ci_8a3220
 ARG UBUNTU=ubuntu:20.04
 
 #use UBUNTU with rocm version set
@@ -122,7 +122,7 @@ ARG MIOPEN_DIR=/root/dMIOpen
 #Clone MIOpen
 RUN git clone https://github.com/ROCm/MIOpen.git $MIOPEN_DIR
 WORKDIR $MIOPEN_DIR
-ARG MIOPEN_BRANCH=develop
+ARG MIOPEN_BRANCH=alex_bn
 RUN git pull && git checkout $MIOPEN_BRANCH
 
 ARG PREFIX=/opt/rocm
@@ -166,7 +166,7 @@ RUN git submodule update --init --recursive
 ARG FIN_DIR=$MIOPEN_DIR/fin
 WORKDIR $FIN_DIR
 # Can be a branch or a SHA
-ARG FIN_BRANCH=develop
+ARG FIN_BRANCH=alex_bn_perf
 RUN if ! [ -z $FIN_BRANCH ]; then \
         git fetch && git checkout $FIN_BRANCH; \
     fi

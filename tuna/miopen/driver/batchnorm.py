@@ -26,11 +26,13 @@
 ###############################################################################
 """Module that encapsulates the DB representation of a batch_normDriver cmd"""
 
+from typing import Any
 from tuna.utils.logger import setup_logger
 from tuna.miopen.driver.base import MIOpenDriver
 from tuna.miopen.utils.metadata import BN_CONFIG_COLS, IN_TENSOR_COLS, PREC_TO_CMD
 from tuna.miopen.utils.metadata import SUPPORTED_BN_CMDS, TABLE_COLS_BN_MAP, BN_DEFAULTS
-from tuna.miopen.utils.metadata import DIRECTION, DIR_MAP, BN_SKIP_ARGS
+#from tuna.miopen.utils.metadata import DIRECTION, DIR_MAP, BN_SKIP_ARGS
+from tuna.miopen.utils.metadata import BN_SKIP_ARGS
 from tuna.miopen.db.batch_norm_tables import BNConfig
 from tuna.miopen.utils.parsing import get_fd_name, arg_valid
 from tuna.miopen.utils.helper import get_db_id
@@ -58,7 +60,7 @@ class DriverBatchNorm(MIOpenDriver):
     self.in_h: int = 1
     self.in_w: int = 1
     self.in_channels: int = 1
-    self.in_layout: str = 'NCHW'
+    self.layout: str = 'NCHW'
     self.num_dims: int = 2
     self.direction: str = 'F'
     self.save: int = 0
@@ -84,23 +86,23 @@ class DriverBatchNorm(MIOpenDriver):
     self._cmd = value
 
   def parse_driver_line(self, line: str) -> None:
-    super().parse_driver_line(line)
-    self.compute_direction()
+    self.parse_driver_line(line)
+    #self.compute_direction()
 
   def compose_weight_t(self):
     """ Overridden Method """
     raise NotImplementedError("Not implemented")
 
-  def compute_direction(self) -> None:
-    """Setting BN direction based on forw and back"""
-    direction_t: int
-    direction_t = int(self.forw) + 4 * int(self.back)
+  #def compute_direction(self) -> None:
+  #  """Setting BN direction based on forw and back"""
+  #  direction_t: int
+  #  direction_t = int(self.forw) + 4 * int(self.back)
 
-    if direction_t and direction_t in DIRECTION:
-      self.direction = DIR_MAP[direction_t]
-    else:
-      raise ValueError("Can't import driver commmand line, \
-          one and only one of forw or back must be set")
+  #  #if direction_t and direction_t in DIRECTION:
+  #  #  self.direction = DIR_MAP[direction_t]
+  #  #else:
+  #  #  raise ValueError("Can't import driver commmand line, \
+  #  #      one and only one of forw or back must be set")
 
   def parse_row(self, db_obj: BNConfig) -> None:
     """Overwritting base class function for batch_norm"""
@@ -111,21 +113,23 @@ class DriverBatchNorm(MIOpenDriver):
     for key, value in db_obj.to_dict(ommit_ts=True, ommit_valid=True).items():
       if key not in ('id', 'input_t', 'driver'):
         setattr(self, key, value)
-    self.compute_direction()
-    self.in_layout = db_obj.in_layout
+    #self.compute_direction()
+    self.layout = db_obj.layout
 
   def compose_tensors(self, keep_id: bool = False) -> dict:
     """Get tensors needed for DB table based on config type"""
     c_dict = self.get_bn_dict()
 
     if keep_id:
-      c_dict['id'] = get_db_id(c_dict, BNConfig)
+      dict_copy = c_dict.copy()
+      dict_copy.pop('driver')
+      c_dict['id'] = get_db_id(dict_copy, BNConfig)
 
     return c_dict
 
   def get_layouts(self):
     """Get batch norm layouts"""
-    return ["in_layout"]
+    return ["layout"]
 
   def get_bn_dict(self) -> dict:
     """Populate c_dict with conv table elems"""
@@ -179,3 +183,24 @@ class DriverBatchNorm(MIOpenDriver):
   def set_cmd(self, data_type: str) -> None:
     """Set cmd based on tensor data type"""
     self.cmd = PREC_TO_CMD[ConfigType.batch_norm][data_type]
+
+  def construct_driver_from_db(self, db_obj: Any) -> bool:
+    """Takes a bn_config row and returns a driver cmd"""
+    LOGGER.info('Processing db_row: %s', db_obj.to_dict())
+    #common tensor among convolution and batch norm
+    self.decompose_input_t(db_obj)
+    self.parse_row(db_obj)
+
+    return True
+
+  def has_layout_in(self, _, layouts):
+    """Check if layout defined by prefix is in layouts"""
+    return self.layout in layouts
+
+  def get_layout(self, prefix='in'):
+    """Get layout defined by prefix"""
+    return self.layout
+
+  def set_layout(self, layout, prefix="in"):
+    """Set layout with prefix to layout arg"""
+    self.layout = layout

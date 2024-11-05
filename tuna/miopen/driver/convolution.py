@@ -44,7 +44,7 @@ from tuna.miopen.utils.config_type import ConfigType
 LOGGER = setup_logger('driver_conv')
 
 
-#pylint: disable=too-many-instance-attributes
+#pylint: disable=too-many-instance-attributes, too-many-public-methods
 class DriverConvolution(MIOpenDriver):
   """Represents an MIOpenDriver convolution command"""
 
@@ -134,7 +134,7 @@ class DriverConvolution(MIOpenDriver):
     """Import config attributes from fdb key line"""
     fds: dict
     direction: str
-    fds, _, direction = get_fds_from_cmd(line)
+    fds, _, direction = get_fds_from_cmd(line, ConfigType.convolution)
     setattr(self, 'direction',
             DIR_MAP.get(direction,
                         ''))  # Use .get() to safely access the dictionary
@@ -321,3 +321,38 @@ class DriverConvolution(MIOpenDriver):
   def set_cmd(self, data_type: str) -> None:
     """Set cmd based on tensor data type"""
     self.cmd = PREC_TO_CMD[ConfigType.convolution][data_type]
+
+  def construct_driver_from_db(self, db_obj: Any) -> bool:
+    """Takes a bn_config row and returns a driver cmd"""
+    LOGGER.info('Processing db_row: %s', db_obj.to_dict())
+    #common tensor among convolution and batch norm
+    self.decompose_input_t(db_obj)
+    self.decompose_weight_t(db_obj)
+    self.parse_row(db_obj)
+
+    return True
+
+  def has_layout_in(self, prefix, layouts):
+    """Check if layout defined by prefix is in layouts"""
+    if prefix == "in":
+      return self.in_layout in layouts
+    if prefix == "fil":  #weight
+      return self.fil_layout in layouts
+    return self.out_layout in layouts
+
+  def get_layout(self, prefix):
+    """Get layout defined by prefix"""
+    if prefix == "in":
+      return self.in_layout
+    if prefix == "fil":  #weight
+      return self.fil_layout
+    return self.out_layout
+
+  def set_layout(self, layout, prefix):
+    """Set layout with prefix to layout arg"""
+    if prefix == "in":
+      self.in_layout = layout
+    elif prefix == "fil":  #weight
+      self.fil_layout = layout
+    else:
+      self.out_layout = layout

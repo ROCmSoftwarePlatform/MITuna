@@ -90,6 +90,7 @@ class FinClass(WorkerInterface):
 
     self.config_type = ConfigType.convolution if self.config_type is None else ConfigType(
         self.config_type)
+    print(self.config_type)
 
     super().__init__(**kwargs)
 

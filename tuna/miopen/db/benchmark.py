@@ -53,7 +53,11 @@ class Framework(BASE):
 
 
 class ModelEnum(pyenum):
-  """Represents model enums"""
+  """Represents model enums.
+  Naming scheme: Upper case first letter
+                 If not first letter, all lower case
+                 Refrain from adding version, there is a field for that.
+  """
   RESNET50 = 'Resnet50'
   RESNEXT101 = 'Resnext101'
   VGG16 = 'Vgg16'
@@ -64,26 +68,26 @@ class ModelEnum(pyenum):
   INCEPTION4 = 'Inception4'
   MASKRCNN = 'Mask-r-cnn'
   SHUFFLENET = 'Shufflenet'
-  SSD = 'ssd'
+  SSD = 'Ssd'
   MOBILENET = 'Mobilenet'
   RESNET101 = 'Resnet101'
   RESNET152 = 'Resnet152'
   VGG11 = 'Vgg11'
   DENSENET = 'Densenet'
   DENSENET201 = 'Densenet201'
-  ATOA_SMALL = 'atoa_small'
-  ATOA_MEDIUM = 'atoa_medium'
-  PEAK = 'peak'
-  DENSENET121 = 'densenet121'
-  DENSENET161 = 'densenet161'
-  DENSENET169 = 'densenet169'
-  MNASNET0_5 = 'mnasnet0_5'
-  MNASNET0_75 = 'mnasnet0_75'
-  MNASNET1_5 = 'mnasnet1_0'
-  MNASNET1_3 = 'mnasnet1_3'
+  ATOA_SMALL = 'Atoa_small'
+  ATOA_MEDIUM = 'Atoa_medium'
+  PEAK = 'Peak'
+  DENSENET121 = 'Densenet121'
+  DENSENET161 = 'Densenet161'
+  DENSENET169 = 'Densenet169'
+  MNASNET0_5 = 'Mnasnet0_5'
+  MNASNET0_75 = 'Mnasnet0_75'
+  MNASNET1_5 = 'Mnasnet1_0'
+  MNASNET1_3 = 'Mnasnet1_3'
   RESNET18 = 'Resnet18'
   RESNET34 = 'Resnet34'
-  VGG13 = 'vgg13'
+  VGG13 = 'Vgg13'
   RESNEXT101_32x8d = 'Resnext101_32x8d'
   RESNET50_32X4D = 'Resnext50_32x4d'
   SHUFFLENET_V2_X0_5 = 'Shufflenet_v2_x0_5'
@@ -94,10 +98,10 @@ class ModelEnum(pyenum):
   SQUEEZENET1_1 = 'Squeezenet1_1'
   WIDE_RESNET101_2 = 'Wide_resnet101_2'
   WIDE_RESNET50_2 = 'Wide_resnet50_2'
-  VGG11_BN = 'Vgg11_bn'
-  VGG13_BN = 'Vgg13_bn'
-  VGG16_BN = 'Vgg16_bn'
-  VGG19_BN = 'Vgg19_bn'
+  CVT = "Cvt"
+  MASKCNN = "Maskcnn"
+  MASKRNN = "Maskrnn"
+  RETINANET = 'Retinanet'
 
   def __str__(self):
     return self.value

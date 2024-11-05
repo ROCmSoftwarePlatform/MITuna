@@ -121,6 +121,7 @@ TABLE_COLS_BN_MAP = {
     'B': ('beta', 0.0),
     '!': ('in_d', 0),
     '-in_d': ('in_d', 0),
+    'D': ('in_d', 0),
     '-forw': ('forw', 1),
     'F': ('forw', 1),
     'H': ('in_h', 32),
@@ -142,7 +143,9 @@ TABLE_COLS_BN_MAP = {
     '-run': ('run', 0),
     'r': ('run', 0),
     '-save': ('save', 0),
-    's': ('save', 0)
+    's': ('save', 0),
+    '-layout': ('layout', 'NCHW'),
+    'L': ('layout', 'NCHW')
 }
 
 SUPPORTED_LAYOUTS = ["NCHW", "NHWC", "NCDHW", "NDHWC"]
@@ -151,6 +154,12 @@ SUPPORTED_LAYOUTS = ["NCHW", "NHWC", "NCDHW", "NDHWC"]
 #3D layouts
 NCDHW_LAYOUT = {
     'in_layout': {
+        'dim1': 'in_channels',
+        'dim2': 'in_d',
+        'dim3': 'in_h',
+        'dim4': 'in_w'
+    },
+    'layout': {
         'dim1': 'in_channels',
         'dim2': 'in_d',
         'dim3': 'in_h',
@@ -166,6 +175,12 @@ NCDHW_LAYOUT = {
 }
 NDHWC_LAYOUT = {
     'in_layout': {
+        'dim1': 'in_d',
+        'dim2': 'in_h',
+        'dim3': 'in_w',
+        'dim4': 'in_channels'
+    },
+    'layout': {
         'dim1': 'in_d',
         'dim2': 'in_h',
         'dim3': 'in_w',
@@ -187,6 +202,12 @@ NCHW_LAYOUT = {
         'dim3': 'in_h',
         'dim4': 'in_w'
     },
+    'layout': {
+        'dim1': 'in_channels',
+        'dim2': 'in_d',
+        'dim3': 'in_h',
+        'dim4': 'in_w'
+    },
     'wei_layout': {
         'dim0': 'out_channels',
         'dim1': 'in_channels',
@@ -197,6 +218,12 @@ NCHW_LAYOUT = {
 }
 NHWC_LAYOUT = {
     'in_layout': {
+        'dim1': 'in_d',
+        'dim2': 'in_h',
+        'dim3': 'in_w',
+        'dim4': 'in_channels'
+    },
+    'layout': {
         'dim1': 'in_d',
         'dim2': 'in_h',
         'dim3': 'in_w',
@@ -221,11 +248,16 @@ TENSOR_PRECISION = {
     'INT8': 'INT8',
     'convint8': 'INT8',
     'bnorm': 'FP32',
-    'bnormfp16': 'FP16'
+    'bnormfp16': 'FP16',
+    'bnormbfp16': 'BFP16',
+    'bnormfp16fp32': 'FP16FP32',
+    'bnormbfp16fp32': 'BFP16FP32'
 }
 
 SUPPORTED_CONV_CMDS = ['conv', 'convfp16', 'convbfp16', 'convint8']
-SUPPORTED_BN_CMDS = ['bnorm', 'bnormfp16']
+SUPPORTED_BN_CMDS = [
+    'bnorm', 'bnormfp16', 'bnormbfp16', 'bnormfp16fp32', 'bnormbfp16fp32'
+]
 
 CONV_CONFIG_COLS = [
     'batchsize', 'spatial_dim', 'pad_h', 'pad_w', 'pad_d', 'conv_stride_h',
@@ -241,7 +273,8 @@ TENSOR_COLS = [
 IN_TENSOR_COLS = ['in_channels', 'in_d', 'in_h', 'in_w']
 
 BN_CONFIG_COLS = [
-    'batchsize', 'forw', 'mode', 'run', 'alpha', 'beta', 'back', 'run', 'save'
+    'batchsize', 'forw', 'mode', 'run', 'alpha', 'beta', 'back', 'run', 'save',
+    'layout'
 ]
 
 TABLE_COLS_FUSION_MAP = {
@@ -445,17 +478,30 @@ SLV_ENV_MAP = {
 }
 
 #used in Parsing
-FDS_3D = [
+FDS_3D_CONV = [
     'pad_d', 'pad_h', 'pad_w', 'out_channels', 'fil_d', 'fil_w', 'fil_h',
     'dilation_d', 'dilation_w', 'dilation_h', 'conv_stride_d', 'conv_stride_w',
     'conv_stride_h', 'in_channels', 'in_d', 'in_w', 'in_h', 'batchsize',
     'group_count', 'in_layout', 'out_layout', 'fil_layout'
 ]
 
-FDS_2D = [
+FDS_3D_BN = [
+    'pad_d', 'pad_h', 'pad_w', 'out_channels', 'fil_d', 'fil_w', 'fil_h',
+    'dilation_d', 'dilation_w', 'dilation_h', 'conv_stride_d', 'conv_stride_w',
+    'conv_stride_h', 'in_channels', 'in_d', 'in_w', 'in_h', 'batchsize',
+    'group_count', 'layout', 'out_layout', 'fil_layout'
+]
+
+FDS_2D_CONV = [
     'pad_h', 'pad_w', 'out_channels', 'fil_w', 'fil_h', 'dilation_w',
     'dilation_h', 'conv_stride_w', 'conv_stride_h', 'in_channels', 'in_w',
     'in_h', 'batchsize', 'group_count', 'in_layout', 'out_layout', 'fil_layout'
+]
+
+FDS_2D_BN = [
+    'pad_h', 'pad_w', 'out_channels', 'fil_w', 'fil_h', 'dilation_w',
+    'dilation_h', 'conv_stride_w', 'conv_stride_h', 'in_channels', 'in_w',
+    'in_h', 'batchsize', 'group_count', 'layout', 'out_layout', 'fil_layout'
 ]
 
 MIOPEN_ALG_LIST = [
@@ -592,7 +638,10 @@ PREC_TO_CMD = {
     },
     ConfigType.batch_norm: {
         'FP32': 'bnorm',
-        'FP16': 'bnormfp16'
+        'FP16': 'bnormfp16',
+        'FP16FP32': 'bnormFP16FP32',
+        'BFP16': 'bnormbfp16',
+        'BFP16FP32': 'bnormBFP16FP32'
     }
 }
 CMD_TO_PREC = {
@@ -601,7 +650,10 @@ CMD_TO_PREC = {
     'convbfp16': 'BF16',
     'convint8': 'INT8',
     'bnorm': 'FP32',
-    'bnormfp16': 'FP16'
+    'bnormfp16': 'FP16',
+    'bnormbfp16': 'BFP16',
+    'bnormfp16fp32': 'FP16FP32',
+    'bnormBFP16FP32': 'BFP16FP32'
 }
 
 MYSQL_CONFIG_COLS = [
